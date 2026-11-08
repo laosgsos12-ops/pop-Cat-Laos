@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ປັອບແຄັດ ລາວ - POPCAT LAOS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Lao typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            font-family: 'Noto Sans Lao', 'Outfit', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .font-outfit {
+            font-family: 'Outfit', 'Noto Sans Lao', sans-serif;
+        }
+
+        /* Pop animation for numbers */
+        @keyframes pop-bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-pop {
+            animation: pop-bounce 0.12s ease-out;
+        }
+
+        /* Floating +1 floating particle style */
+        .click-particle {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: 2rem;
+            color: #f59e0b;
+            text-shadow: 0px 2px 8px rgba(0,0,0,0.5), 0 0 10px rgba(245, 158, 11, 0.8);
+            animation: floatUp 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+            z-index: 50;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -20px) scale(0.6) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -70px) scale(1.3) rotate(-10deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -120px) scale(1) rotate(10deg);
+            }
+        }
+
+        /* Custom Scrollbar for Leaderboard */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-lg">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <!-- App Logo / Title -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-amber-500 to-red-500 p-2 rounded-2xl shadow-md shadow-amber-500/20">
+                    <span class="text-2xl leading-none">🐱</span>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                        ປັອບແຄັດ ລາວ <span class="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-red-400">🇱🇦 LAOS</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">ກົດແມວສະສົມຄະແນນ 18 ແຂວງ</p>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2">
+                <!-- Sound Toggle -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition flex items-center gap-1.5 text-sm font-semibold">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                    <span id="soundText" class="hidden sm:inline">ເປີດສຽງ</span>
+                </button>
+                <!-- Profile / Settings Button -->
+                <button onclick="openProfileModal()" class="px-3 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-500/25 border border-blue-400/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span class="hidden sm:inline">ປ່ຽນແຂວງ/ຊື່</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-4xl w-full mx-auto px-4 py-4 flex-1 flex flex-col items-center justify-start gap-6">
+
+        <!-- NATIONWIDE TOTAL CLICK STATS HEADER -->
+        <section class="w-full text-center bg-gradient-to-b from-slate-900 to-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+            
+            <p class="text-xs uppercase font-extrabold tracking-widest text-amber-400 mb-1 flex items-center justify-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                ຍອດກົດທັງໝົດທົ່ວປະເທດ (18 ແຂວງ)
+            </p>
+
+            <div id="globalCounter" class="text-4xl sm:text-6xl font-black font-outfit text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 tracking-wider my-1 drop-shadow-sm">
+                0
+            </div>
+
+            <!-- CURRENT USER INFO DISPLAY BANNER -->
+            <div class="mt-3 inline-flex flex-wrap items-center justify-center gap-3 bg-slate-950/80 px-4 py-2 rounded-2xl border border-slate-800 text-sm">
+                <span class="text-slate-400">ແຂວງຂອງທ່ານ: <strong id="userProvinceDisplay" class="text-amber-400 font-bold">ນະຄອນຫຼວງວຽງຈັນ</strong></span>
+                <span class="text-slate-600">•</span>
+                <span class="text-slate-400">ຊື່: <strong id="userNameDisplay" class="text-blue-400 font-bold">ຜູ້ຫຼິ້ນນິຣະນາມ</strong></span>
+                <span class="text-slate-600">•</span>
+                <span class="text-slate-400">ທ່ານກົດໄປ: <strong id="userClicksDisplay" class="text-emerald-400 font-bold font-outfit">0</strong> ຄັ້ງ</span>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE POPCAT CLICK AREA -->
+        <section class="relative w-full max-w-sm flex flex-col items-center justify-center cursor-pointer group my-2 select-none" id="catClickArea">
+            
+            <!-- Floating Pop Particle Container -->
+            <div id="particleContainer" class="absolute inset-0 pointer-events-none z-30"></div>
+
+            <!-- CAT SVG DRAWING GRAPHIC (State 0: Closed Mouth, State 1: Open Mouth) -->
+            <div id="catBox" class="w-64 h-64 sm:w-80 sm:h-80 relative flex items-center justify-center transition-transform duration-75 transform active:scale-95">
+                
+                <!-- SVG PopCat -->
+                <svg id="catSvg" viewBox="0 0 300 300" class="w-full h-full drop-shadow-2xl filter drop-shadow-[0_10px_25px_rgba(245,158,11,0.25)]">
+                    <!-- CAT BODY & EARS BASE -->
+                    <g id="catBody">
+                        <!-- Left Ear -->
+                        <path d="M 60,110 L 30,30 L 110,70 Z" fill="#E2E8F0" stroke="#0F172A" stroke-width="6" stroke-linejoin="round"/>
+                        <path d="M 65,100 L 42,40 L 100,70 Z" fill="#F472B6"/>
+                        
+                        <!-- Right Ear -->
+                        <path d="M 240,110 L 270,30 L 190,70 Z" fill="#E2E8F0" stroke="#0F172A" stroke-width="6" stroke-linejoin="round"/>
+                        <path d="M 235,100 L 258,40 L 200,70 Z" fill="#F472B6"/>
+
+                        <!-- Head Shape -->
+                        <ellipse cx="150" cy="160" rx="110" ry="95" fill="#F8FAFC" stroke="#0F172A" stroke-width="6"/>
+
+                        <!-- Whiskers -->
+                        <!-- Left Whiskers -->
+                        <line x1="30" y1="165" x2="80" y2="160" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="25" y1="185" x2="80" y2="175" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                        <!-- Right Whiskers -->
+                        <line x1="270" y1="165" x2="220" y2="160" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="275" y1="185" x2="220" y2="175" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+
+                        <!-- Cute Eyes -->
+                        <ellipse cx="105" cy="140" rx="14" ry="18" fill="#0F172A"/>
+                        <circle cx="109" cy="134" r="5" fill="#FFFFFF"/>
+                        
+                        <ellipse cx="195" cy="140" rx="14" ry="18" fill="#0F172A"/>
+                        <circle cx="199" cy="134" r="5" fill="#FFFFFF"/>
+
+                        <!-- Small Nose -->
+                        <polygon points="150,158 143,150 157,150" fill="#F472B6" />
+                    </g>
+
+                    <!-- CLOSED MOUTH STATE (Default) -->
+                    <g id="mouthClosed" class="block">
+                        <path d="M 135,165 Q 142.5,175 150,165 Q 157.5,175 165,165" fill="none" stroke="#0F172A" stroke-width="5" stroke-linecap="round"/>
+                    </g>
+
+                    <!-- OPEN MOUTH STATE (POP) -->
+                    <g id="mouthOpen" class="hidden">
+                        <!-- Big Oval Mouth -->
+                        <ellipse cx="150" cy="195" rx="42" ry="50" fill="#0F172A" stroke="#0F172A" stroke-width="4"/>
+                        <!-- Tongue -->
+                        <path d="M 122,210 Q 150,250 178,210 Q 150,220 122,210 Z" fill="#EF4444"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Instruction Hint -->
+            <p class="mt-2 text-slate-400 text-xs sm:text-sm font-semibold flex items-center gap-1.5 bg-slate-900/80 px-4 py-1.5 rounded-full border border-slate-800">
+                <span>👆</span> ແຕະໜ້າຈໍ ຫຼື ກົດປຸ່ມໃດກໍໄດ້ໃນຄີບອດ <span>🎹</span>
+            </p>
+        </section>
+
+        <!-- LEADERBOARD & STATS SECTION -->
+        <section class="w-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl">
+            <!-- Leaderboard Tabs Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <button id="tabProvincesBtn" onclick="switchTab('provinces')" class="px-4 py-2 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md transition">
+                        🏆 ຈັດອັນດັບ 18 ແຂວງ
+                    </button>
+                    <button id="tabPlayersBtn" onclick="switchTab('players')" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                        👑 ຈັດອັນດັບຜູ້ຫຼິ້ນ (Top 50)
+                    </button>
+                </div>
+                <span class="text-xs text-slate-500 font-medium">ອັບເດດແບບ Real-time ⚡</span>
+            </div>
+
+            <!-- TAB 1: PROVINCES LEADERBOARD LIST (18 PROVINCES) -->
+            <div id="provincesTabContent" class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
+                <!-- Province Items will be generated dynamically -->
+            </div>
+
+            <!-- TAB 2: TOP PLAYERS LEADERBOARD LIST -->
+            <div id="playersTabContent" class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 hidden">
+                <!-- Player Items will be generated dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-slate-950 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-500 mt-6">
+        <p>ປັອບແຄັດ ລາວ (POPCAT LAOS) © 2026 - ສ້າງເພື່ອຄວາມບັນເທິງ ແລະ ຄວາມສາມັກຄີ 18 ແຂວງທົ່ວປະເທດ</p>
+    </footer>
+
+    <!-- PROFILE & PROVINCE SELECTION MODAL -->
+    <div id="profileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative animate-pop">
+            
+            <h2 class="text-xl font-black text-amber-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-id-card"></i> ຕັ້ງຄ່າຂໍ້ມູນຜູ້ຫຼິ້ນ & ແຂວງ
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Input Player Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">ຊື່ຜູ້ຫຼິ້ນຂອງທ່ານ</label>
+                    <input type="text" id="modalNameInput" maxlength="20" placeholder="ໃສ່ຊື່ຂອງທ່ານ..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-sm">
+                </div>
+
+                <!-- Select Province (18 Provinces) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">ເລືອກແຂວງຂອງທ່ານ (18 ແຂວງ)</label>
+                    <select id="modalProvinceSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-amber-400 focus:outline-none focus:border-amber-400 text-sm font-semibold">
+                        <!-- Filled by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button onclick="closeProfileModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition">
+                    ຍົກເລີກ
+                </button>
+                <button onclick="saveProfileModal()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-sm font-black transition shadow-lg shadow-amber-500/20">
+                    ບັນທຶກຂໍ້ມູນ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & APPLICATION CODE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, increment, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 18 PROVINCES OF LAOS (17 Provinces + 1 Capital)
+        const LAO_PROVINCES = [
+            { id: "vt", name: "ນະຄອນຫຼວງວຽງຈັນ", flag: "🏛️" },
+            { id: "ps", name: "ຜົ້ງສາລີ", flag: "⛰️" },
+            { id: "lm", name: "ຫຼວງນ້ຳທາ", flag: "🌿" },
+            { id: "bk", name: "ບໍ່ແກ້ວ", flag: "💎" },
+            { id: "ou", name: "ອຸດົມໄຊ", flag: "🌄" },
+            { id: "lp", name: "ຫຼວງພະບາງ", flag: "🛕" },
+            { id: "ho", name: "ຫົວພັນ", flag: "🧵" },
+            { id: "xa", name: "ໄຊຍະບູລີ", flag: "🐘" },
+            { id: "xi", name: "ຊຽງຂວາງ", flag: "🏺" },
+            { id: "vi", name: "ວຽງຈັນ", flag: "🏞️" },
+            { id: "xs", name: "ໄຊສົມບູນ", flag: "🏔️" },
+            { id: "bl", name: "ບໍລິຄຳໄຊ", flag: "🌊" },
+            { id: "km", name: "ຄຳມ່ວນ", flag: "🦇" },
+            { id: "sv", name: "ສະຫວັນນະເຂດ", flag: "🌉" },
+            { id: "sl", name: "ສາລະວັນ", flag: "☕" },
+            { id: "se", name: "ເຊກອງ", flag: "🌾" },
+            { id: "cp", name: "ຈຳປາສັກ", flag: "🏛️" },
+            { id: "at", name: "ອັດຕະປື", flag: "🪵" }
+        ];
+
+        // Global State variables
+        let soundEnabled = true;
+        let activeTab = 'provinces';
+        let userClicks = 0;
+        let pendingBufferClicks = 0;
+        let globalTotalClicks = 0;
+        let userProvinceId = 'vt'; // Default Vientiane Capital
+        let userName = 'ຜູ້ຫຼິ້ນນິຣະນາມ'; // Default Anonymous Player
+        let userId = 'user_' + Math.random().toString(36).substring(2, 9);
+        let provinceData = {};
+        let topPlayersData = [];
+
+        // Firebase references
+        let db = null;
+        let auth = null;
+        let firebaseUser = null;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'popcat-laos-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Path constants enforcing Rule 1
+        const PROVINCES_PATH = `artifacts/${appId}/public/data/provinces`;
+        const LEADERBOARD_PATH = `artifacts/${appId}/public/data/leaderboard`;
+
+        // Initialize local province counts
+        LAO_PROVINCES.forEach(p => {
+            provinceData[p.id] = { id: p.id, name: p.name, flag: p.flag, clicks: 0 };
+        });
+
+        // WEB AUDIO SYNTHESIZER FOR POP/MEOW SOUND EFFECT
+        let audioCtx = null;
+        function playPopSound() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                // Generate pitch sweep for cute cat meow-pop sound effect
+                osc.type = 'sine';
+                const baseFreq = 420 + (Math.random() * 60 - 30);
+                osc.frequency.setValueAtTime(baseFreq, now);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2.1, now + 0.07);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.3, now + 0.14);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } catch (e) {
+                console.error("Audio error:", e);
+            }
+        }
+
+        // LOAD LOCAL STORAGE DATA IF AVAILABLE
+        function loadSavedState() {
+            try {
+                const savedProv = localStorage.getItem('popcat_laos_province');
+                if (savedProv && LAO_PROVINCES.some(p => p.id === savedProv)) {
+                    userProvinceId = savedProv;
+                }
+                const savedName = localStorage.getItem('popcat_laos_username');
+                if (savedName && savedName.trim()) {
+                    userName = savedName.trim();
+                }
+                const savedClicks = localStorage.getItem('popcat_laos_userclicks');
+                if (savedClicks) {
+                    userClicks = parseInt(savedClicks, 10) || 0;
+                }
+                const savedUserId = localStorage.getItem('popcat_laos_uid');
+                if (savedUserId) {
+                    userId = savedUserId;
+                } else {
+                    localStorage.setItem('popcat_laos_uid', userId);
+                }
+            } catch (e) {}
+            updateUserInfoUI();
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem('popcat_laos_province', userProvinceId);
+                localStorage.setItem('popcat_laos_username', userName);
+                localStorage.setItem('popcat_laos_userclicks', userClicks.toString());
+            } catch (e) {}
+        }
+
+        // UI UPDATE FUNCTIONS
+        function updateUserInfoUI() {
+            const currentProvObj = LAO_PROVINCES.find(p => p.id === userProvinceId) || LAO_PROVINCES[0];
+            document.getElementById('userProvinceDisplay').innerText = `${currentProvObj.flag} ${currentProvObj.name}`;
+            document.getElementById('userNameDisplay').innerText = userName;
+            document.getElementById('userClicksDisplay').innerText = userClicks.toLocaleString('en-US');
+        }
+
+        function updateGlobalTotalUI() {
+            let total = 0;
+            Object.values(provinceData).forEach(p => {
+                total += (p.clicks || 0);
+            });
+            globalTotalClicks = total;
+            document.getElementById('globalCounter').innerText = total.toLocaleString('en-US');
+        }
+
+        function renderProvincesLeaderboard() {
+            const container = document.getElementById('provincesTabContent');
+            const sortedList = Object.values(provinceData).sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+
+            let html = '';
+            sortedList.forEach((prov, idx) => {
+                const rank = idx + 1;
+                let badgeClass = "bg-slate-800 text-slate-400";
+                let rankIcon = `#${rank}`;
+                if (rank === 1) { badgeClass = "bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-400/30"; rankIcon = "🥇"; }
+                else if (rank === 2) { badgeClass = "bg-slate-300 text-slate-950 font-black"; rankIcon = "🥈"; }
+                else if (rank === 3) { badgeClass = "bg-amber-700 text-white font-black"; rankIcon = "🥉"; }
+
+                const percentage = globalTotalClicks > 0 ? ((prov.clicks / globalTotalClicks) * 100).toFixed(1) : '0.0';
+                const isUserProv = prov.id === userProvinceId;
+
+                html += `
+                <div class="p-3 rounded-2xl ${isUserProv ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-950/60 border-slate-800'} border flex flex-col gap-2 transition hover:border-slate-700">
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${badgeClass}">
+                                ${rankIcon}
+                            </span>
+                            <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                                ${prov.flag} ${prov.name}
+                                ${isUserProv ? '<span class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">ແຂວງຂອງທ່ານ</span>' : ''}
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-black text-amber-400 font-outfit text-base">${(prov.clicks || 0).toLocaleString()}</span>
+                            <span class="text-xs text-slate-400 font-semibold ml-1">ຄັ້ງ (${percentage}%)</span>
+                        </div>
+                    </div>
+                    <!-- Visual Progress Bar -->
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-300" style="width: ${Math.max(percentage, 1)}%"></div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderPlayersLeaderboard() {
+            const container = document.getElementById('playersTabContent');
+            if (!topPlayersData || topPlayersData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500 text-sm">
+                        <i class="fa-solid fa-users text-3xl mb-2 block"></i>
+                        ຍັງບໍ່ມີຂໍ້ມູນຜູ້ຫຼິ້ນ ເປັນຄົນທຳອິດທີ່ກົດເລີຍ!
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            topPlayersData.forEach((player, idx) => {
+                const rank = idx + 1;
+                let badgeClass = "bg-slate-800 text-slate-400";
+                let rankIcon = `#${rank}`;
+                if (rank === 1) { badgeClass = "bg-amber-400 text-slate-950 font-black"; rankIcon = "🥇"; }
+                else if (rank === 2) { badgeClass = "bg-slate-300 text-slate-950 font-black"; rankIcon = "🥈"; }
+                else if (rank === 3) { badgeClass = "bg-amber-700 text-white font-black"; rankIcon = "🥉"; }
+
+                const provObj = LAO_PROVINCES.find(p => p.id === player.provinceId) || { name: player.provinceName || 'ບໍ່ລະບຸ', flag: '🇱🇦' };
+
+                html += `
+                <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${badgeClass}">
+                            ${rankIcon}
+                        </span>
+                        <div>
+                            <div class="font-bold text-slate-100">${escapeHtml(player.name || 'ຜູ້ຫຼິ້ນນິຣະນາມ')}</div>
+                            <div class="text-xs text-slate-400 flex items-center gap-1">
+                                ${provObj.flag} ${provObj.name}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-black text-emerald-400 font-outfit text-base">${(player.clicks || 0).toLocaleString()}</span>
+                        <span class="text-xs text-slate-400 ml-0.5">ຄັ້ງ</span>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // CAT CLICK POP ACTION
+        let mouthTimeout = null;
+        function handlePop(e) {
+            // Play Sound Synthesizer
+            playPopSound();
+
+            // Increment local stats
+            userClicks++;
+            pendingBufferClicks++;
+            if (!provinceData[userProvinceId]) {
+                provinceData[userProvinceId] = { id: userProvinceId, name: 'ນະຄອນຫຼວງວຽງຈັນ', flag: '🏛️', clicks: 0 };
+            }
+            provinceData[userProvinceId].clicks = (provinceData[userProvinceId].clicks || 0) + 1;
+
+            // UI updates
+            updateUserInfoUI();
+            updateGlobalTotalUI();
+            if (activeTab === 'provinces') {
+                renderProvincesLeaderboard();
+            }
+
+            // Animate Cat Mouth
+            const mouthClosed = document.getElementById('mouthClosed');
+            const mouthOpen = document.getElementById('mouthOpen');
+            const catBox = document.getElementById('catBox');
+
+            mouthClosed.classList.add('hidden');
+            mouthOpen.classList.remove('hidden');
+            catBox.classList.add('animate-pop');
+
+            clearTimeout(mouthTimeout);
+            mouthTimeout = setTimeout(() => {
+                mouthClosed.classList.remove('hidden');
+                mouthOpen.classList.add('hidden');
+                catBox.classList.remove('animate-pop');
+            }, 100);
+
+            // Spawn floating "+1" visual particle
+            spawnClickParticle(e);
+
+            // Save user local click progress
+            saveStateToStorage();
+        }
+
+        function spawnClickParticle(e) {
+            const container = document.getElementById('particleContainer');
+            const particle = document.createElement('div');
+            particle.className = 'click-particle';
+            particle.innerText = '+1';
+
+            let x = 140;
+            let y = 140;
+
+            if (e && (e.clientX || e.touches)) {
+                const rect = container.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : rect.width / 2);
+                const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.height / 2);
+                x = clientX - rect.left;
+                y = clientY - rect.top;
+            }
+
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            container.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 600);
+        }
+
+        // TAB SWITCHING
+        window.switchTab = function(tab) {
+            activeTab = tab;
+            const btnProv = document.getElementById('tabProvincesBtn');
+            const btnPlay = document.getElementById('tabPlayersBtn');
+            const contentProv = document.getElementById('provincesTabContent');
+            const contentPlay = document.getElementById('playersTabContent');
+
+            if (tab === 'provinces') {
+                btnProv.className = "px-4 py-2 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md transition";
+                btnPlay.className = "px-4 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+                contentProv.classList.remove('hidden');
+                contentPlay.classList.add('hidden');
+                renderProvincesLeaderboard();
+            } else {
+                btnPlay.className = "px-4 py-2 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md transition";
+                btnProv.className = "px-4 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+                contentPlay.classList.remove('hidden');
+                contentProv.classList.add('hidden');
+                renderPlayersLeaderboard();
+            }
+        };
+
+        // SOUND TOGGLE
+        window.toggleSound = function() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                text.innerText = "ເປີດສຽງ";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+                text.innerText = "ປິດສຽງ";
+            }
+        };
+
+        // MODAL FUNCTIONS
+        window.openProfileModal = function() {
+            const modal = document.getElementById('profileModal');
+            const nameInput = document.getElementById('modalNameInput');
+            const selectProv = document.getElementById('modalProvinceSelect');
+
+            nameInput.value = userName;
+            selectProv.value = userProvinceId;
+            modal.classList.remove('hidden');
+        };
+
+        window.closeProfileModal = function() {
+            document.getElementById('profileModal').classList.add('hidden');
+        };
+
+        window.saveProfileModal = function() {
+            const nameInput = document.getElementById('modalNameInput').value.trim();
+            const selectProv = document.getElementById('modalProvinceSelect').value;
+
+            if (nameInput) {
+                userName = nameInput;
+            }
+            if (selectProv && LAO_PROVINCES.some(p => p.id === selectProv)) {
+                userProvinceId = selectProv;
+            }
+
+            saveStateToStorage();
+            updateUserInfoUI();
+            renderProvincesLeaderboard();
+            closeProfileModal();
+        };
+
+        // POPULATE MODAL PROVINCES SELECT DROPDOWN
+        function populateProvinceSelect() {
+            const select = document.getElementById('modalProvinceSelect');
+            let html = '';
+            LAO_PROVINCES.forEach(p => {
+                html += `<option value="${p.id}">${p.flag} ${p.name}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        // REAL-TIME FIREBASE SYNC ENGINE
+        async function setupFirebaseSync() {
+            if (!firebaseConfig) {
+                console.log("Firebase config not available. Operating in single-session mode.");
+                renderProvincesLeaderboard();
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Authenticate before query (Rule 3)
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                firebaseUser = auth.currentUser;
+
+                // Subscribe real-time to Provinces Collection
+                const provCollRef = collection(db, 'artifacts', appId, 'public', 'data', 'provinces');
+                onSnapshot(provCollRef, (snapshot) => {
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        const pId = docSnap.id;
+                        if (provinceData[pId]) {
+                            provinceData[pId].clicks = data.clicks || 0;
+                        }
+                    });
+                    updateGlobalTotalUI();
+                    renderProvincesLeaderboard();
+                }, (error) => {
+                    console.error("Provinces listener error:", error);
+                });
+
+                // Subscribe real-time to Leaderboard Collection
+                const playersCollRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                onSnapshot(playersCollRef, (snapshot) => {
+                    const playersArr = [];
+                    snapshot.forEach(docSnap => {
+                        playersArr.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    // Sort in memory (Rule 2)
+                    playersArr.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+                    topPlayersData = playersArr.slice(0, 50);
+                    if (activeTab === 'players') {
+                        renderPlayersLeaderboard();
+                    }
+                }, (error) => {
+                    console.error("Leaderboard listener error:", error);
+                });
+
+                // Periodic buffer sync to Firestore every 1.5s
+                setInterval(syncPendingClicksToCloud, 1500);
+
+            } catch (err) {
+                console.error("Firebase Initialization Error:", err);
+            }
+        }
+
+        async function syncPendingClicksToCloud() {
+            if (!db || !auth.currentUser || pendingBufferClicks <= 0) return;
+
+            const clicksToSend = pendingBufferClicks;
+            pendingBufferClicks = 0; // reset buffer locally
+
+            const currentProvObj = LAO_PROVINCES.find(p => p.id === userProvinceId) || LAO_PROVINCES[0];
+
+            try {
+                // Update province counter in Firestore (Rule 1 & Rule 3)
+                const provDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'provinces', userProvinceId);
+                await setDoc(provDocRef, {
+                    name: currentProvObj.name,
+                    flag: currentProvObj.flag,
+                    clicks: increment(clicksToSend),
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                // Update player entry in Leaderboard (Rule 1 & Rule 3)
+                const playerDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', userId);
+                await setDoc(playerDocRef, {
+                    name: userName,
+                    provinceId: userProvinceId,
+                    provinceName: currentProvObj.name,
+                    clicks: increment(clicksToSend),
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+            } catch (err) {
+                console.error("Cloud Sync Error:", err);
+                pendingBufferClicks += clicksToSend; // re-add buffer on failure
+            }
+        }
+
+        // EVENT LISTENERS INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedState();
+            populateProvinceSelect();
+            updateGlobalTotalUI();
+            renderProvincesLeaderboard();
+
+            const catArea = document.getElementById('catClickArea');
+
+            // Handle touch and click events
+            catArea.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                handlePop(e);
+            });
+
+            // Handle Keyboard keys
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+                if (!e.repeat) {
+                    handlePop(null);
+                }
+            });
+
+            // Initialize Firebase real-time connection
+            setupFirebaseSync();
+        });
+    </script>
+</body>
+</html>
